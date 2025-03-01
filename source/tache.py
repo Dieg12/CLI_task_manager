@@ -44,3 +44,28 @@ class Tache:
                 f"Description: {self.description}\n"
                 f"Priorité: {self.priorite}\n"
                 f"Date limite: {self.date_limite}")
+
+    # --- Méthodes d'aide pour la sérialisation JSON ---
+    def to_dict(self):
+        """
+        Renvoie un dictionnaire représentant la tâche,
+        pratique pour la sérialisation en JSON.
+        """
+        return {
+            "titre": self.titre,
+            "description": self.description,
+            "priorite": self.priorite,
+            "date_limite": self.date_limite
+        }
+
+    @classmethod
+    def from_dict(cls, tache_dict):
+        """
+        Reconstruit un objet Tache à partir d'un dictionnaire.
+        """
+        return cls(
+            titre=tache_dict["titre"],
+            description=tache_dict.get("description"),
+            priorite=tache_dict.get("priorite", 1),
+            date_limite=tache_dict.get("date_limite")
+        )

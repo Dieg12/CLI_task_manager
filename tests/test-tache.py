@@ -1,4 +1,4 @@
-from tache import Tache
+from ..source.tache import Tache
 
 def main():
     # Test de la création d'une tâche avec uniquement le titre
