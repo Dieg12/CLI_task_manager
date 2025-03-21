@@ -40,10 +40,12 @@ class Tache:
 
     # Méthode d'affichage pour faciliter la visualisation d'une tâche
     def __str__(self):
-        return (f"Tâche: {self.titre}\n"
-                f"Description: {self.description}\n"
-                f"Priorité: {self.priorite}\n"
-                f"Date limite: {self.date_limite}")
+        return (
+            f"Tâche: {self.titre}\n"
+            f"Description: {self.description}\n"
+            f"Priorité: {self.priorite}\n"
+            f"Date limite: {self.date_limite}"
+        )
 
     # --- Méthodes d'aide pour la sérialisation JSON ---
     def to_dict(self):
@@ -55,7 +57,7 @@ class Tache:
             "titre": self.titre,
             "description": self.description,
             "priorite": self.priorite,
-            "date_limite": self.date_limite
+            "date_limite": self.date_limite,
         }
 
     @classmethod
@@ -67,5 +69,5 @@ class Tache:
             titre=tache_dict["titre"],
             description=tache_dict.get("description"),
             priorite=tache_dict.get("priorite", 1),
-            date_limite=tache_dict.get("date_limite")
+            date_limite=tache_dict.get("date_limite"),
         )
