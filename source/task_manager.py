@@ -3,8 +3,8 @@
 import argparse
 import json
 import random
-from tache import Tache  # Importation de la classe Tache depuis tache.py
-from textes import WELCOME_MESSAGE, ERROR_MESSAGE
+from source.tache import Tache  # Importation de la classe Tache depuis tache.py
+from source.textes import WELCOME_MESSAGE, ERROR_MESSAGE
 
 def load_tasks(filename="tasks.json"):
     """
