@@ -1,7 +1,9 @@
+# task_manager.py
+
 import argparse
 import json
-import datetime
-from tache import Tache
+import random
+from tache import Tache  # Importation de la classe Tache depuis tache.py
 from textes import WELCOME_MESSAGE, ERROR_MESSAGE
 
 def load_tasks(filename="tasks.json"):
@@ -30,6 +32,16 @@ def save_tasks(tasks, filename="tasks.json"):
     tasks_data = [task.to_dict() for task in tasks]
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(tasks_data, file, ensure_ascii=False, indent=4)
+
+def generate_unique_id(tasks):
+    """
+    Génère un identifiant aléatoire à 6 chiffres qui n'est pas déjà utilisé parmi les tâches.
+    """
+    existing_ids = {task.id for task in tasks if task.id is not None}
+    while True:
+        candidate = random.randint(100000, 999999)
+        if candidate not in existing_ids:
+            return candidate
 
 def main():
     print(WELCOME_MESSAGE)
@@ -83,7 +95,7 @@ def main():
 
     args = parser.parse_args()
 
-    # Exemple d'intégration : on charge d'abord les tâches existantes
+    # Chargement des tâches existantes
     tasks = load_tasks()
 
     if args.version:
@@ -96,41 +108,63 @@ def main():
         print(f"  Priorité    : {args.priority}")
         if args.due is not None:
             print(f"  Date d'échéance : {args.due}")
-        # Création et ajout de la nouvelle tâche
+        # Création de la nouvelle tâche sans ID initialement
         nouvelle_tache = Tache(args.title, args.desc, args.priority, args.due)
+        # Génération d'un ID unique et affectation à la tâche
+        nouvelle_tache.id = generate_unique_id(tasks)
         tasks.append(nouvelle_tache)
         save_tasks(tasks)
-        print("Tâche ajoutée et sauvegardée dans tasks.json.")
+        print(f"Tâche ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée dans tasks.json.")
     elif args.command == "remove":
-        # Ici, vous devriez rechercher la tâche par son identifiant et la supprimer.
-        print("Suppression de la tâche avec l'ID :", args.id)
-        # Par exemple, en se basant sur une position dans la liste ou un attribut spécifique.
-        # Puis sauvegarder la liste mise à jour :
-        save_tasks(tasks)
+        task_id = int(args.id)
+        # Recherche la tâche par son ID
+        task_to_remove = None
+        for task in tasks:
+            if task.id == task_id:
+                task_to_remove = task
+                break
+        if task_to_remove:
+            tasks.remove(task_to_remove)
+            save_tasks(tasks)
+            print(f"Tâche avec l'ID {task_id} supprimée.")
+        else:
+            print(f"Aucune tâche trouvée avec l'ID {task_id}.")
     elif args.command == "list":
         print("Affichage de la liste des tâches")
         if args.sort:
             print(f"Tri par : {args.sort}")
-            # Implémentez ici le tri en fonction de args.sort
+            if args.sort == "title":
+                tasks.sort(key=lambda x: x.titre)
+            elif args.sort == "priority":
+                tasks.sort(key=lambda x: x.priorite)
+            elif args.sort == "due":
+                tasks.sort(key=lambda x: x.date_limite or "")
         # Affichage de toutes les tâches
-        for index, task in enumerate(tasks):
-            print(f"ID: {index} -> {task}")
+        for task in tasks:
+            print(task)
+            print("-" * 40)
     else:
         print(ERROR_MESSAGE)
 
-
 if __name__ == "__main__":
-    # Chargement initial
-    tasks = load_tasks()
-    print("Tâches chargées :")
-    for t in tasks:
-        print(t)
+    main()
 
-    # Ajout d'une nouvelle tâche d'exemple
-    print("\nAjout d'une nouvelle tâche d'exemple...")
-    nouvelle_tache = Tache("Exemple 3", "Ceci est une tâche d'exemple", priorite=-4, date_limite=str(datetime.datetime(2025, 3, 29)))
-    tasks.append(nouvelle_tache)
-
-    # Sauvegarde des tâches mises à jour
-    save_tasks(tasks)
-    print("La nouvelle tâche a été ajoutée et sauvegardée.")
+# ------------------------------------------------------------------------------
+# Exemples d'utilisation indépendants pour tester la persistance et la gestion des IDs
+#
+# if __name__ == "__main__":
+#     # Chargement initial
+#     tasks = load_tasks()
+#     print("Tâches chargées :")
+#     for t in tasks:
+#         print(t)
+#
+#     # Ajout d'une nouvelle tâche d'exemple avec génération automatique de l'ID
+#     print("\nAjout d'une nouvelle tâche d'exemple...")
+#     nouvelle_tache = Tache("Exemple", "Ceci est une tâche d'exemple", priorite=2)
+#     nouvelle_tache.id = generate_unique_id(tasks)
+#     tasks.append(nouvelle_tache)
+#
+#     # Sauvegarde des tâches mises à jour
+#     save_tasks(tasks)
+#     print(f"La nouvelle tâche a été ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée.")

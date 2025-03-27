@@ -1,11 +1,14 @@
+# tache.py
+
 class Tache:
-    def __init__(self, titre, description=None, priorite=1, date_limite=None):
+    def __init__(self, titre, description=None, priorite=1, date_limite=None, id=None):
         # Le titre est obligatoire
         self.titre = titre
         self.description = description
         # On vérifie que la priorité est au moins égale à 1 (si inférieure, on fixe à 1)
         self.priorite = priorite if priorite >= 1 else 1
         self.date_limite = date_limite
+        self.id = id  # Attribut pour l'identifiant unique de la tâche
 
     # Getter et setter pour le titre
     def get_titre(self):
@@ -41,7 +44,8 @@ class Tache:
     # Méthode d'affichage pour faciliter la visualisation d'une tâche
     def __str__(self):
         return (
-            f"Tâche: {self.titre}\n"
+            f"Tâche ID: {self.id}\n"
+            f"Titre: {self.titre}\n"
             f"Description: {self.description}\n"
             f"Priorité: {self.priorite}\n"
             f"Date limite: {self.date_limite}"
@@ -54,6 +58,7 @@ class Tache:
         pratique pour la sérialisation en JSON.
         """
         return {
+            "id": self.id,
             "titre": self.titre,
             "description": self.description,
             "priorite": self.priorite,
@@ -70,4 +75,5 @@ class Tache:
             description=tache_dict.get("description"),
             priorite=tache_dict.get("priorite", 1),
             date_limite=tache_dict.get("date_limite"),
+            id=tache_dict.get("id")
         )
