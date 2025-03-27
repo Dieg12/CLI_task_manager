@@ -6,6 +6,7 @@ import random
 from source.tache import Tache  # Importation de la classe Tache depuis tache.py
 from source.textes import WELCOME_MESSAGE, ERROR_MESSAGE
 
+
 def load_tasks(filename="tasks.json"):
     """
     Charge les tâches depuis un fichier JSON et retourne une liste d'objets Tache.
@@ -24,6 +25,7 @@ def load_tasks(filename="tasks.json"):
         print("Erreur lors du décodage du fichier JSON.")
         return []
 
+
 def save_tasks(tasks, filename="tasks.json"):
     """
     Sauvegarde une liste d'objets Tache dans un fichier JSON.
@@ -32,6 +34,7 @@ def save_tasks(tasks, filename="tasks.json"):
     tasks_data = [task.to_dict() for task in tasks]
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(tasks_data, file, ensure_ascii=False, indent=4)
+
 
 def generate_unique_id(tasks):
     """
@@ -42,6 +45,7 @@ def generate_unique_id(tasks):
         candidate = random.randint(100000, 999999)
         if candidate not in existing_ids:
             return candidate
+
 
 def main():
     print(WELCOME_MESSAGE)
@@ -75,7 +79,9 @@ def main():
     )
 
     # Commande 'remove' : Supprime une tâche de la liste
-    parser_remove = subparsers.add_parser("remove", help="Supprime une tâche de la liste")
+    parser_remove = subparsers.add_parser(
+        "remove", help="Supprime une tâche de la liste"
+    )
     parser_remove.add_argument(
         "--id", required=True, help="Identifiant de la tâche à supprimer"
     )
@@ -114,7 +120,9 @@ def main():
         nouvelle_tache.id = generate_unique_id(tasks)
         tasks.append(nouvelle_tache)
         save_tasks(tasks)
-        print(f"Tâche ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée dans tasks.json.")
+        print(
+            f"Tâche ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée dans tasks.json."
+        )
     elif args.command == "remove":
         task_id = int(args.id)
         # Recherche la tâche par son ID
@@ -146,25 +154,6 @@ def main():
     else:
         print(ERROR_MESSAGE)
 
+
 if __name__ == "__main__":
     main()
-
-# ------------------------------------------------------------------------------
-# Exemples d'utilisation indépendants pour tester la persistance et la gestion des IDs
-#
-# if __name__ == "__main__":
-#     # Chargement initial
-#     tasks = load_tasks()
-#     print("Tâches chargées :")
-#     for t in tasks:
-#         print(t)
-#
-#     # Ajout d'une nouvelle tâche d'exemple avec génération automatique de l'ID
-#     print("\nAjout d'une nouvelle tâche d'exemple...")
-#     nouvelle_tache = Tache("Exemple", "Ceci est une tâche d'exemple", priorite=2)
-#     nouvelle_tache.id = generate_unique_id(tasks)
-#     tasks.append(nouvelle_tache)
-#
-#     # Sauvegarde des tâches mises à jour
-#     save_tasks(tasks)
-#     print(f"La nouvelle tâche a été ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée.")

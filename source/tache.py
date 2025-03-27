@@ -1,5 +1,6 @@
 # tache.py
 
+
 class Tache:
     def __init__(self, titre, description=None, priorite=1, date_limite=None, id=None):
         # Le titre est obligatoire
@@ -75,5 +76,5 @@ class Tache:
             description=tache_dict.get("description"),
             priorite=tache_dict.get("priorite", 1),
             date_limite=tache_dict.get("date_limite"),
-            id=tache_dict.get("id")
+            id=tache_dict.get("id"),
         )

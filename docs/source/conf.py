@@ -9,26 +9,26 @@ import sys
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'CLI_task_manager'
-copyright = '2025, Diego Iglesias'
-author = 'Diego Iglesias'
-release = '0.1'
+project = "CLI_task_manager"
+copyright = "2025, Diego Iglesias"
+author = "Diego Iglesias"
+release = "0.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = ["sphinx.ext.autodoc"]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
-language = 'fr'
+language = "fr"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
-html_static_path = ['_static']
+html_theme = "alabaster"
+html_static_path = ["_static"]
 
 
-sys.path.insert(0, os.path.abspath('../../source'))
+sys.path.insert(0, os.path.abspath("../../source"))
