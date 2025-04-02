@@ -1,5 +1,50 @@
+# task_manager.py
+
 import argparse
-from textes import WELCOME_MESSAGE, ERROR_MESSAGE
+import json
+import random
+from source.tache import Tache  # Importation de la classe Tache depuis tache.py
+from source.textes import WELCOME_MESSAGE, ERROR_MESSAGE
+
+
+def load_tasks(filename="tasks.json"):
+    """
+    Charge les tâches depuis un fichier JSON et retourne une liste d'objets Tache.
+    Si le fichier n'existe pas ou en cas d'erreur de lecture, retourne une liste vide.
+    """
+    try:
+        with open(filename, "r", encoding="utf-8") as file:
+            tasks_data = json.load(file)
+        # Reconstruit les objets Tache à partir des dictionnaires
+        tasks = [Tache.from_dict(item) for item in tasks_data]
+        return tasks
+    except FileNotFoundError:
+        # Fichier non trouvé, on retourne une liste vide
+        return []
+    except json.JSONDecodeError:
+        print("Erreur lors du décodage du fichier JSON.")
+        return []
+
+
+def save_tasks(tasks, filename="tasks.json"):
+    """
+    Sauvegarde une liste d'objets Tache dans un fichier JSON.
+    """
+    # Conversion de chaque objet Tache en dictionnaire
+    tasks_data = [task.to_dict() for task in tasks]
+    with open(filename, "w", encoding="utf-8") as file:
+        json.dump(tasks_data, file, ensure_ascii=False, indent=4)
+
+
+def generate_unique_id(tasks):
+    """
+    Génère un identifiant aléatoire à 6 chiffres qui n'est pas déjà utilisé parmi les tâches.
+    """
+    existing_ids = {task.id for task in tasks if task.id is not None}
+    while True:
+        candidate = random.randint(100000, 999999)
+        if candidate not in existing_ids:
+            return candidate
 
 
 def main():
@@ -41,7 +86,7 @@ def main():
         "--id", required=True, help="Identifiant de la tâche à supprimer"
     )
 
-    # Commande 'liste' : Affiche la liste des tâches
+    # Commande 'list' : Affiche la liste des tâches
     parser_list = subparsers.add_parser("list", help="Affiche la liste des tâches")
     parser_list.add_argument(
         "--sort",
@@ -54,28 +99,95 @@ def main():
         ),
     )
 
+    # Commande 'edit' : Modifie une tâche existante
+    parser_edit = subparsers.add_parser("edit", help="Modifie une tâche existante")
+    parser_edit.add_argument(
+        "--id", required=True, help="Identifiant de la tâche à modifier"
+    )
+    parser_edit.add_argument("--title", help="Nouveau titre de la tâche")
+    parser_edit.add_argument("--desc", help="Nouvelle description de la tâche")
+    parser_edit.add_argument(
+        "--priority", type=int, help="Nouvelle priorité de la tâche"
+    )
+    parser_edit.add_argument(
+        "--due", help="Nouvelle date d'échéance de la tâche (format YYYY-MM-DD)"
+    )
+
     args = parser.parse_args()
 
-    # Traitement des commandes en fonction des arguments
+    # Chargement des tâches existantes
+    tasks = load_tasks()
+
     if args.version:
         print("Version 1.0")
     elif args.command == "add":
         print("Ajout de la tâche :")
         print(f"  Titre       : {args.title}")
-    if args.desc is not None:
-        print(f"  Description : {args.desc}")
-    print(f"  Priorité    : {args.priority}")
-    if args.due is not None:
-        print(f"  Date d'échéance : {args.due}")
-
+        if args.desc is not None:
+            print(f"  Description : {args.desc}")
+        print(f"  Priorité    : {args.priority}")
+        if args.due is not None:
+            print(f"  Date d'échéance : {args.due}")
+        # Création de la nouvelle tâche sans ID initialement
+        nouvelle_tache = Tache(args.title, args.desc, args.priority, args.due)
+        # Génération d'un ID unique et affectation à la tâche
+        nouvelle_tache.id = generate_unique_id(tasks)
+        tasks.append(nouvelle_tache)
+        save_tasks(tasks)
+        print(
+            f"Tâche ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée dans tasks.json."
+        )
     elif args.command == "remove":
-        # À compléter : appel de la fonction de suppression de tâche
-        print("Suppression de la tâche avec l'ID :", args.id)
+        task_id = int(args.id)
+        # Recherche la tâche par son ID
+        task_to_remove = None
+        for task in tasks:
+            if task.id == task_id:
+                task_to_remove = task
+                break
+        if task_to_remove:
+            tasks.remove(task_to_remove)
+            save_tasks(tasks)
+            print(f"Tâche avec l'ID {task_id} supprimée.")
+        else:
+            print(f"Aucune tâche trouvée avec l'ID {task_id}.")
     elif args.command == "list":
-        # À compléter : appel de la fonction d'affichage de la liste des tâches
         print("Affichage de la liste des tâches")
         if args.sort:
             print(f"Tri par : {args.sort}")
+            if args.sort == "title":
+                tasks.sort(key=lambda x: x.titre)
+            elif args.sort == "priority":
+                tasks.sort(key=lambda x: x.priorite)
+            elif args.sort == "due":
+                tasks.sort(key=lambda x: x.date_limite or "")
+        # Affichage de toutes les tâches
+        for task in tasks:
+            print(task)
+            print("-" * 40)
+    elif args.command == "edit":
+        task_id = int(args.id)
+        # Recherche de la tâche à modifier
+        task_to_edit = None
+        for task in tasks:
+            if task.id == task_id:
+                task_to_edit = task
+                break
+        if task_to_edit:
+            if args.title is not None:
+                task_to_edit.set_titre(args.title)
+            if args.desc is not None:
+                task_to_edit.set_description(args.desc)
+            if args.priority is not None:
+                task_to_edit.set_priorite(
+                    args.priority
+                )  # La méthode set_priorite assure que la priorité est au minimum 1
+            if args.due is not None:
+                task_to_edit.set_date_limite(args.due)
+            save_tasks(tasks)
+            print(f"Tâche avec l'ID {task_id} mise à jour.")
+        else:
+            print(f"Aucune tâche trouvée avec l'ID {task_id}.")
     else:
         print(ERROR_MESSAGE)
 
