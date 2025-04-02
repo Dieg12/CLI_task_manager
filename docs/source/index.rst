@@ -1,30 +1,28 @@
 .. CLI_task_manager documentation master file, created by
-   sphinx-quickstart on Wed Jan 15 10:28:50 2025.
+   sphinx-quickstart on Sun Jan 19 23:25:32 2025.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-CLI_task_manager documentation
-==============================
+Bienvenue dans la documentation de votre projet.
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+.. automodule:: source.tache
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-Contents
---------
+.. automodule:: source.task_manager
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Indices et tables
+=================
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   modules
-
-Module Documentation
-=====================
-
-The following module is included in this project:
-
-.. automodule:: hello_world
-   :members:
-   :undoc-members:
-   :show-inheritance:
