@@ -99,6 +99,20 @@ def main():
         ),
     )
 
+    # Commande 'edit' : Modifie une tâche existante
+    parser_edit = subparsers.add_parser("edit", help="Modifie une tâche existante")
+    parser_edit.add_argument(
+        "--id", required=True, help="Identifiant de la tâche à modifier"
+    )
+    parser_edit.add_argument("--title", help="Nouveau titre de la tâche")
+    parser_edit.add_argument("--desc", help="Nouvelle description de la tâche")
+    parser_edit.add_argument(
+        "--priority", type=int, help="Nouvelle priorité de la tâche"
+    )
+    parser_edit.add_argument(
+        "--due", help="Nouvelle date d'échéance de la tâche (format YYYY-MM-DD)"
+    )
+
     args = parser.parse_args()
 
     # Chargement des tâches existantes
@@ -151,6 +165,29 @@ def main():
         for task in tasks:
             print(task)
             print("-" * 40)
+    elif args.command == "edit":
+        task_id = int(args.id)
+        # Recherche de la tâche à modifier
+        task_to_edit = None
+        for task in tasks:
+            if task.id == task_id:
+                task_to_edit = task
+                break
+        if task_to_edit:
+            if args.title is not None:
+                task_to_edit.set_titre(args.title)
+            if args.desc is not None:
+                task_to_edit.set_description(args.desc)
+            if args.priority is not None:
+                task_to_edit.set_priorite(
+                    args.priority
+                )  # La méthode set_priorite assure que la priorité est au minimum 1
+            if args.due is not None:
+                task_to_edit.set_date_limite(args.due)
+            save_tasks(tasks)
+            print(f"Tâche avec l'ID {task_id} mise à jour.")
+        else:
+            print(f"Aucune tâche trouvée avec l'ID {task_id}.")
     else:
         print(ERROR_MESSAGE)
 
