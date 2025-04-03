@@ -13,6 +13,7 @@ Ce module définit la classe Tache qui représente une tâche avec les attributs
 Les méthodes associées permettent la manipulation et la sérialisation des tâches.
 """
 
+
 class Tache:
     """
     Classe représentant une tâche.
