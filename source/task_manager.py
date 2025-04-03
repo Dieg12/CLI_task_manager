@@ -1,4 +1,20 @@
-# task_manager.py
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Module task_manager.
+
+Ce module fournit une interface en ligne de commande (CLI) pour la gestion d'une liste de tâches.
+Il offre les fonctionnalités suivantes :
+
+- Chargement et sauvegarde des tâches depuis/vers un fichier JSON.
+- Ajout d'une nouvelle tâche, avec génération d'un identifiant unique.
+- Suppression d'une tâche existante par son identifiant.
+- Affichage de la liste des tâches, avec possibilité de tri par titre, priorité ou date d'échéance.
+- Modification d'une tâche existante (édition).
+
+Les tâches sont représentées par des instances de la classe Tache définie dans le module source.tache.
+Les messages affichés à l'utilisateur sont centralisés dans le module source.textes.
+"""
 
 import argparse
 import json
@@ -10,7 +26,14 @@ from source.textes import WELCOME_MESSAGE, ERROR_MESSAGE
 def load_tasks(filename="tasks.json"):
     """
     Charge les tâches depuis un fichier JSON et retourne une liste d'objets Tache.
-    Si le fichier n'existe pas ou en cas d'erreur de lecture, retourne une liste vide.
+
+    Cette fonction tente d'ouvrir et de décoder le fichier JSON spécifié par `filename`.
+    Si le fichier n'existe pas ou en cas d'erreur de décodage, elle retourne une liste vide.
+
+    :param filename: Chemin du fichier JSON contenant les tâches, par défaut "tasks.json".
+    :type filename: str
+    :return: Liste des tâches chargées sous forme d'instances de Tache.
+    :rtype: list[Tache]
     """
     try:
         with open(filename, "r", encoding="utf-8") as file:
@@ -29,8 +52,15 @@ def load_tasks(filename="tasks.json"):
 def save_tasks(tasks, filename="tasks.json"):
     """
     Sauvegarde une liste d'objets Tache dans un fichier JSON.
+
+    Chaque objet Tache est converti en dictionnaire avant d'être sauvegardé.
+    Le fichier est écrit avec l'encodage UTF-8 et une indentation pour améliorer la lisibilité.
+
+    :param tasks: Liste des tâches à sauvegarder.
+    :type tasks: list[Tache]
+    :param filename: Chemin du fichier JSON dans lequel sauvegarder les tâches, par défaut "tasks.json".
+    :type filename: str
     """
-    # Conversion de chaque objet Tache en dictionnaire
     tasks_data = [task.to_dict() for task in tasks]
     with open(filename, "w", encoding="utf-8") as file:
         json.dump(tasks_data, file, ensure_ascii=False, indent=4)
@@ -38,7 +68,15 @@ def save_tasks(tasks, filename="tasks.json"):
 
 def generate_unique_id(tasks):
     """
-    Génère un identifiant aléatoire à 6 chiffres qui n'est pas déjà utilisé parmi les tâches.
+    Génère un identifiant aléatoire à 6 chiffres qui n'est pas déjà utilisé parmi les tâches existantes.
+
+    La fonction récupère les identifiants existants dans la liste `tasks` et continue à générer
+    un nombre aléatoire entre 100000 et 999999 jusqu'à obtenir un identifiant unique.
+
+    :param tasks: Liste des tâches existantes.
+    :type tasks: list[Tache]
+    :return: Un identifiant unique pour une nouvelle tâche.
+    :rtype: int
     """
     existing_ids = {task.id for task in tasks if task.id is not None}
     while True:
@@ -48,6 +86,22 @@ def generate_unique_id(tasks):
 
 
 def main():
+    """
+    Point d'entrée principal de l'application CLI de gestion de tâches.
+
+    Cette fonction réalise les opérations suivantes :
+      - Affiche un message de bienvenue.
+      - Analyse les arguments de la ligne de commande à l'aide d'argparse.
+      - En fonction de la commande spécifiée (add, remove, list, edit ou --version), exécute l'opération correspondante :
+          - `add` : Ajoute une nouvelle tâche avec les attributs fournis et génère un identifiant unique.
+          - `remove` : Supprime une tâche identifiée par son ID.
+          - `list` : Affiche la liste des tâches, avec possibilité de tri par titre, priorité ou date d'échéance.
+          - `edit` : Modifie une tâche existante en mettant à jour ses attributs.
+          - `--version` : Affiche la version de l'application.
+      - Charge les tâches existantes depuis un fichier JSON avant l'exécution et sauvegarde les modifications apportées.
+
+    :return: None
+    """
     print(WELCOME_MESSAGE)
 
     parser = argparse.ArgumentParser(
@@ -115,7 +169,7 @@ def main():
 
     args = parser.parse_args()
 
-    # Chargement des tâches existantes
+    # Chargement des tâches existantes depuis le fichier JSON
     tasks = load_tasks()
 
     if args.version:
@@ -139,7 +193,7 @@ def main():
         )
     elif args.command == "remove":
         task_id = int(args.id)
-        # Recherche la tâche par son ID
+        # Recherche de la tâche à supprimer par son ID
         task_to_remove = None
         for task in tasks:
             if task.id == task_id:
@@ -167,7 +221,7 @@ def main():
             print("-" * 40)
     elif args.command == "edit":
         task_id = int(args.id)
-        # Recherche de la tâche à modifier
+        # Recherche de la tâche à modifier par son ID
         task_to_edit = None
         for task in tasks:
             if task.id == task_id:
@@ -179,9 +233,7 @@ def main():
             if args.desc is not None:
                 task_to_edit.set_description(args.desc)
             if args.priority is not None:
-                task_to_edit.set_priorite(
-                    args.priority
-                )  # La méthode set_priorite assure que la priorité est au minimum 1
+                task_to_edit.set_priorite(args.priority)
             if args.due is not None:
                 task_to_edit.set_date_limite(args.due)
             save_tasks(tasks)
