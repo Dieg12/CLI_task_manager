@@ -22,8 +22,10 @@ import random
 from source.tache import Tache  # Importation de la classe Tache depuis tache.py
 from source.textes import WELCOME_MESSAGE, ERROR_MESSAGE
 
+DEFAULT_FILENAME = "tasks.json"  # Nom par défaut du fichier de sauvegarde des tâches
 
-def load_tasks(filename="tasks.json"):
+
+def load_tasks(filename):
     """
     Charge les tâches depuis un fichier JSON et retourne une liste d'objets Tache.
 
@@ -170,7 +172,7 @@ def main():
     args = parser.parse_args()
 
     # Chargement des tâches existantes depuis le fichier JSON
-    tasks = load_tasks()
+    tasks = load_tasks(DEFAULT_FILENAME)
 
     if args.version:
         print("Version 1.0")
