@@ -81,11 +81,6 @@ def generate_unique_id(tasks):
             return candidate
 
 
-def handle_version(args, tasks):
-    """Affiche la version de l'application."""
-    print("Version 1.0")
-
-
 def handle_add(args, tasks):
     """Ajoute une nouvelle tâche."""
     print("Ajout de la tâche :")
@@ -172,9 +167,6 @@ def main():
         description="Une application CLI simple.",
         formatter_class=argparse.RawTextHelpFormatter,
     )
-    parser.add_argument(
-        "--version", action="store_true", help="Affiche la version de l'application."
-    )
 
     subparsers = parser.add_subparsers(
         dest="command",
@@ -233,11 +225,6 @@ def main():
     parser_edit.set_defaults(func=handle_edit)
 
     args = parser.parse_args()
-
-    # Traitement de l'option version séparément
-    if args.version:
-        handle_version(args, None)
-        return
 
     # Chargement des tâches depuis le fichier JSON
     tasks = load_tasks(DEFAULT_FILENAME)
