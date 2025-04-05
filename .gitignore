@@ -1,6 +1,7 @@
 # Fichiers spécifiques
 tasks.json
-
+_static/
+_templates/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
