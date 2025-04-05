@@ -13,15 +13,12 @@ jobs:
   if_merged:
     #if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.13"]
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: '3.13'
 
     - name: Installation des dependences
       run: |
@@ -35,7 +32,7 @@ jobs:
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
-      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      #if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       with:
         publish_branch: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
