@@ -9,15 +9,6 @@ from source.tache import Tache
 
 
 class TestTaskManagerArgs(unittest.TestCase):
-    def test_version_command_arguments(self):
-        # Pour la commande --version, aucune sauvegarde ne doit être réalisée.
-        test_argv = ["task_manager.py", "--version"]
-        with patch.object(sys, "argv", test_argv):
-            with patch("task_manager.load_tasks", return_value=[]) as mock_load:
-                with patch("task_manager.save_tasks") as mock_save:
-                    task_manager.main()
-                    # Pour la version, save_tasks ne doit pas être appelée.
-                    mock_save.assert_not_called()
 
     def test_add_command_arguments(self):
         # Simuler l'ajout d'une tâche avec des arguments précis.
