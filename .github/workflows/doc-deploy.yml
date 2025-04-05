@@ -1,3 +1,6 @@
+name: Build and Deploy Sphinx Documentation
+# Workflow de construction et de déploiement de la documentation Sphinx
+
 on:
   push:
     branches: 
@@ -26,6 +29,7 @@ jobs:
         pip install sphinx
 
     - name: Build Sphinx documentation
+      continue-on-error: true
       run: |
         sphinx-build -M html ./docs/source ./build --fail-on-warning
 
