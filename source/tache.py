@@ -28,7 +28,7 @@ class Tache:
         id (int or None, optional): L'identifiant unique de la tâche. Defaults to None.
     """
 
-    def __init__(self, titre, description=None, priorite=1, date_limite=None, id=None):
+    def __init__(self, titre, description=None, priorite=1, date_limite=None, task_id=None):
         """
         Initialise une nouvelle instance de Tache.
 
@@ -45,7 +45,7 @@ class Tache:
         # On vérifie que la priorité est au moins égale à 1 (si inférieure, on fixe à 1)
         self.priorite = priorite if priorite >= 1 else 1
         self.date_limite = date_limite
-        self.id = id  # Attribut pour l'identifiant unique de la tâche
+        self.task_id = task_id  # Attribut pour l'identifiant unique de la tâche
 
     def get_titre(self):
         """
@@ -131,7 +131,7 @@ class Tache:
             str: Une chaîne de caractères décrivant la tâche.
         """
         return (
-            f"Tâche ID: {self.id}\n"
+            f"Tâche ID: {self.task_id}\n"
             f"Titre: {self.titre}\n"
             f"Description: {self.description}\n"
             f"Priorité: {self.priorite}\n"
@@ -146,7 +146,7 @@ class Tache:
             dict: Un dictionnaire représentant la tâche.
         """
         return {
-            "id": self.id,
+            "task_id": self.task_id,
             "titre": self.titre,
             "description": self.description,
             "priorite": self.priorite,
@@ -169,5 +169,5 @@ class Tache:
             description=tache_dict.get("description"),
             priorite=tache_dict.get("priorite", 1),
             date_limite=tache_dict.get("date_limite"),
-            id=tache_dict.get("id"),
+            task_id=tache_dict.get("task_id"),
         )

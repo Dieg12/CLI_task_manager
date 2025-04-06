@@ -74,7 +74,7 @@ def generate_unique_id(tasks):
     Returns:
         int: Un identifiant unique.
     """
-    existing_ids = {task.id for task in tasks if task.id is not None}
+    existing_ids = {task.task_id for task in tasks if task.task_id is not None}
     while True:
         candidate = random.randint(100000, 999999)
         if candidate not in existing_ids:
@@ -100,11 +100,11 @@ def handle_add(args, tasks):
     if args.due is not None:
         print(f"  Date d'échéance : {args.due}")
     nouvelle_tache = Tache(args.title, args.desc, args.priority, args.due)
-    nouvelle_tache.id = generate_unique_id(tasks)
+    nouvelle_tache.task_id = generate_unique_id(tasks)
     tasks.append(nouvelle_tache)
     save_tasks(tasks)
     print(
-        f"Tâche ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée dans {DEFAULT_FILENAME}."
+        f"Tâche ajoutée avec l'ID {nouvelle_tache.task_id} et sauvegardée dans {DEFAULT_FILENAME}."
     )
 
 
@@ -118,7 +118,7 @@ def handle_remove(args, tasks):
     task_id = int(args.id)
     task_to_remove = None
     for task in tasks:
-        if task.id == task_id:
+        if task.task_id == task_id:
             task_to_remove = task
             break
     if task_to_remove:
@@ -160,7 +160,7 @@ def handle_edit(args, tasks):
     task_id = int(args.id)
     task_to_edit = None
     for task in tasks:
-        if task.id == task_id:
+        if task.task_id == task_id:
             task_to_edit = task
             break
     if task_to_edit:

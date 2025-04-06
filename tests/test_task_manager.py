@@ -38,11 +38,11 @@ class TestTaskManagerArgs(unittest.TestCase):
                     self.assertEqual(task.get_description(), "Test description")
                     self.assertEqual(task.get_priorite(), 2)
                     self.assertEqual(task.get_date_limite(), "2025-03-05")
-                    self.assertIsNotNone(task.id, "La tâche doit recevoir un ID unique")
+                    self.assertIsNotNone(task.task_id, "La tâche doit recevoir un ID unique")
 
     def test_remove_command_arguments(self):
         # Créer une tâche fictive avec un ID connu pour tester la suppression.
-        task_to_remove = Tache("Task to remove", id=123456)
+        task_to_remove = Tache("Task to remove", task_id=123456)
         test_argv = ["task_manager.py", "remove", "--id", "123456"]
         with patch.object(sys, "argv", test_argv):
             with patch(
@@ -57,7 +57,7 @@ class TestTaskManagerArgs(unittest.TestCase):
 
     def test_edit_command_arguments(self):
         # Créer une tâche fictive à modifier.
-        task_to_edit = Tache("Old Title", "Old Description", 1, "2025-01-01", id=123456)
+        task_to_edit = Tache("Old Title", "Old Description", 1, "2025-01-01", task_id=123456)
         test_argv = [
             "task_manager.py",
             "edit",
@@ -87,8 +87,8 @@ class TestTaskManagerArgs(unittest.TestCase):
 
     def test_list_command_arguments(self):
         # Créer une liste fictive de tâches pour la commande "list".
-        task1 = Tache("Task 1", "Desc 1", 1, "2025-01-01", id=111111)
-        task2 = Tache("Task 2", "Desc 2", 2, "2025-02-02", id=222222)
+        task1 = Tache("Task 1", "Desc 1", 1, "2025-01-01", task_id=111111)
+        task2 = Tache("Task 2", "Desc 2", 2, "2025-02-02", task_id=222222)
         test_argv = ["task_manager.py", "list"]
         with patch.object(sys, "argv", test_argv):
             with patch(

@@ -17,7 +17,7 @@ class TestTache(unittest.TestCase):
         self.assertIsNone(
             tache1.date_limite, "La date limite par défaut devrait être None"
         )
-        self.assertIsNone(tache1.id, "L'id par défaut devrait être None")
+        self.assertIsNone(tache1.task_id, "L'id par défaut devrait être None")
 
     def test_setters_and_getters(self):
         tache1 = Tache("Faire les courses")
@@ -43,10 +43,10 @@ class TestTache(unittest.TestCase):
 
     def test_to_dict_from_dict(self):
         # Création d'une tâche avec un id défini
-        tache1 = Tache("Test", "Test description", 5, "2025-01-01", id=123456)
+        tache1 = Tache("Test", "Test description", 5, "2025-01-01", task_id=123456)
         d = tache1.to_dict()
         expected = {
-            "id": 123456,
+            "task_id": 123456,
             "titre": "Test",
             "description": "Test description",
             "priorite": 5,
@@ -70,11 +70,11 @@ class TestTache(unittest.TestCase):
             "2025-01-01",
             "Erreur sur la date limite reconstruit",
         )
-        self.assertEqual(tache2.id, 123456, "L'id n'a pas été correctement reconstruit")
+        self.assertEqual(tache2.task_id, 123456, "L'id n'a pas été correctement reconstruit")
 
     def test_str_representation(self):
         tache1 = Tache(
-            "Faire les courses", "Acheter du lait", 2, "2025-03-05", id=654321
+            "Faire les courses", "Acheter du lait", 2, "2025-03-05", task_id=654321
         )
         rep = str(tache1)
         self.assertIn(
@@ -88,8 +88,8 @@ class TestTache(unittest.TestCase):
 
     def test_generate_unique_id(self):
         # Créer une liste de tâches avec des IDs connus
-        tache1 = Tache("Tâche 1", id=111111)
-        tache2 = Tache("Tâche 2", id=222222)
+        tache1 = Tache("Tâche 1", task_id=111111)
+        tache2 = Tache("Tâche 2", task_id=222222)
         tasks = [tache1, tache2]
         new_id = generate_unique_id(tasks)
         self.assertNotIn(
