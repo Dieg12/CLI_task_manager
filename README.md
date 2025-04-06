@@ -20,22 +20,22 @@ Lancez l'application via la ligne de commande. Voici quelques exemples de comman
 
 - **Ajouter une tâche** :
    ```bash
-   python task_manager.py add --title "Acheter du pain" --desc "Acheter du pain à la boulangerie" --priority 2 --due "2025-04-10"
+   python -m source.task_manager add --title "Acheter du pain" --desc "Acheter du pain à la boulangerie" --priority 2 --due "2025-04-10"
    ```
 
 - **Lister les tâches** :
    ```bash
-   python task_manager.py list --sort title
+   python -m source.task_manager list --sort title
    ```
 
 - **Supprimer une tâche** :
    ```bash
-   python task_manager.py remove --id 123456
+   python -m source.task_manager remove --id 123456
    ```
 
 - **Modifier une tâche** :
    ```bash
-   python task_manager.py edit --id 123456 --title "Acheter du pain complet" --priority 3
+   python -m source.task_manager edit --id 123456 --title "Acheter du pain complet" --priority 3
    ```
 
 ---
