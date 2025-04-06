@@ -9,10 +9,12 @@ Fonctionnalités:
     - Chargement et sauvegarde des tâches depuis/vers un fichier JSON.
     - Ajout d'une nouvelle tâche, avec génération d'un identifiant unique.
     - Suppression d'une tâche existante par son identifiant.
-    - Affichage de la liste des tâches, avec possibilité de tri par titre, priorité ou date d'échéance.
+    - Affichage de la liste des tâches, avec possibilité de tri par titre,\
+          priorité ou date d'échéance.
     - Modification d'une tâche existante (édition).
 
-Les tâches sont représentées par des instances de la classe Tache, définie dans le module source.tache.
+Les tâches sont représentées par des instances de la classe Tache,\
+      définie dans le module source.tache.
 Les messages affichés à l'utilisateur sont centralisés dans le module source.textes.
 """
 
@@ -55,7 +57,8 @@ def save_tasks(tasks, filename=DEFAULT_FILENAME):
 
     Args:
         tasks (list[Tache]): Liste des tâches à sauvegarder.
-        filename (str, optional): Chemin du fichier JSON de sauvegarde. Defaults to DEFAULT_FILENAME.
+        filename (str, optional): Chemin du fichier JSON de sauvegarde.\
+              Defaults to DEFAULT_FILENAME.
     """
     tasks_data = [task.to_dict() for task in tasks]
     with open(filename, "w", encoding="utf-8") as file:
@@ -71,7 +74,7 @@ def generate_unique_id(tasks):
     Returns:
         int: Un identifiant unique.
     """
-    existing_ids = {task.id for task in tasks if task.id is not None}
+    existing_ids = {task.task_id for task in tasks if task.task_id is not None}
     while True:
         candidate = random.randint(100000, 999999)
         if candidate not in existing_ids:
@@ -81,7 +84,8 @@ def generate_unique_id(tasks):
 def handle_add(args, tasks):
     """Ajoute une nouvelle tâche.
 
-    Affiche les informations de la tâche à ajouter, crée une instance de Tache avec un identifiant unique,
+    Affiche les informations de la tâche à ajouter,\
+          crée une instance de Tache avec un identifiant unique,
     ajoute la tâche à la liste et sauvegarde la liste dans le fichier JSON par défaut.
 
     Args:
@@ -96,11 +100,11 @@ def handle_add(args, tasks):
     if args.due is not None:
         print(f"  Date d'échéance : {args.due}")
     nouvelle_tache = Tache(args.title, args.desc, args.priority, args.due)
-    nouvelle_tache.id = generate_unique_id(tasks)
+    nouvelle_tache.task_id = generate_unique_id(tasks)
     tasks.append(nouvelle_tache)
     save_tasks(tasks)
     print(
-        f"Tâche ajoutée avec l'ID {nouvelle_tache.id} et sauvegardée dans {DEFAULT_FILENAME}."
+        f"Tâche ajoutée avec l'ID {nouvelle_tache.task_id} et sauvegardée dans {DEFAULT_FILENAME}."
     )
 
 
@@ -114,7 +118,7 @@ def handle_remove(args, tasks):
     task_id = int(args.id)
     task_to_remove = None
     for task in tasks:
-        if task.id == task_id:
+        if task.task_id == task_id:
             task_to_remove = task
             break
     if task_to_remove:
@@ -156,7 +160,7 @@ def handle_edit(args, tasks):
     task_id = int(args.id)
     task_to_edit = None
     for task in tasks:
-        if task.id == task_id:
+        if task.task_id == task_id:
             task_to_edit = task
             break
     if task_to_edit:

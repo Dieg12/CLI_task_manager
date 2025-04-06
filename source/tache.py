@@ -13,37 +13,34 @@ Ce module définit la classe Tache qui représente une tâche avec les attributs
 
 Les méthodes associées permettent la manipulation et la sérialisation des tâches.
 """
+from dataclasses import dataclass, field
 
 
+@dataclass
 class Tache:
+    """Représente une tâche avec ses attributs.
+
+    Attributes:
+        titre (str): Le titre de la tâche.
+        description (str, optional): La description de la tâche. Defaults to None.
+        priorite (int): La priorité de la tâche. Defaults to 1.
+        date_limite (str, optional): La date limite de la tâche (format YYYY-MM-DD).\
+              Defaults to None.
+        task_id (int, optional): L'identifiant unique de la tâche. Defaults to None.
     """
-    Classe représentant une tâche.
 
-    Args:
-        titre (str): Le titre de la tâche (obligatoire).
-        description (str or None, optional): La description de la tâche. Defaults to None.
-        priorite (int, optional): La priorité de la tâche (doit être au moins 1). Defaults to 1.
-        date_limite (str or None, optional): La date limite de la tâche, par exemple au format YYYY-MM-DD. Defaults to None.
-        id (int or None, optional): L'identifiant unique de la tâche. Defaults to None.
-    """
+    titre: str
+    description: str = None
+    priorite: int = field(default=1)
+    date_limite: str = None
+    task_id: int = None
 
-    def __init__(self, titre, description=None, priorite=1, date_limite=None, id=None):
+    def __post_init__(self):
+        """Assure la validité des données après l'initialisation.
+
+        Vérifie que la priorité n'est pas inférieure à 1 et la corrige si nécessaire.
         """
-        Initialise une nouvelle instance de Tache.
-
-        Args:
-            titre (str): Le titre de la tâche (obligatoire).
-            description (str or None, optional): La description de la tâche. Defaults to None.
-            priorite (int, optional): La priorité de la tâche, doit être au moins 1. Defaults to 1.
-            date_limite (str or None, optional): La date limite de la tâche, par exemple au format YYYY-MM-DD. Defaults to None.
-            id (int or None, optional): L'identifiant unique de la tâche. Defaults to None.
-        """
-        self.titre = titre
-        self.description = description
-        # On vérifie que la priorité est au moins égale à 1 (si inférieure, on fixe à 1)
-        self.priorite = priorite if priorite >= 1 else 1
-        self.date_limite = date_limite
-        self.id = id  # Attribut pour l'identifiant unique de la tâche
+        self.priorite = max(self.priorite, 1)
 
     def get_titre(self):
         """
@@ -129,7 +126,7 @@ class Tache:
             str: Une chaîne de caractères décrivant la tâche.
         """
         return (
-            f"Tâche ID: {self.id}\n"
+            f"Tâche ID: {self.task_id}\n"
             f"Titre: {self.titre}\n"
             f"Description: {self.description}\n"
             f"Priorité: {self.priorite}\n"
@@ -144,7 +141,7 @@ class Tache:
             dict: Un dictionnaire représentant la tâche.
         """
         return {
-            "id": self.id,
+            "task_id": self.task_id,
             "titre": self.titre,
             "description": self.description,
             "priorite": self.priorite,
@@ -167,5 +164,5 @@ class Tache:
             description=tache_dict.get("description"),
             priorite=tache_dict.get("priorite", 1),
             date_limite=tache_dict.get("date_limite"),
-            id=tache_dict.get("id"),
+            task_id=tache_dict.get("task_id"),
         )
