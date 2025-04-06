@@ -16,12 +16,10 @@ import sys
 import os
 import tempfile
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../source"))
-)
-import task_manager
 from unittest.mock import patch
 from source.tache import Tache
+
+from source import task_manager
 
 
 class TestTaskManagerArgs(unittest.TestCase):
@@ -49,8 +47,8 @@ class TestTaskManagerArgs(unittest.TestCase):
             "2025-03-05",
         ]
         with patch.object(sys, "argv", test_argv):
-            with patch("task_manager.load_tasks", return_value=[]) as mock_load:
-                with patch("task_manager.save_tasks") as mock_save:
+            with patch("source.task_manager.load_tasks", return_value=[]):
+                with patch("source.task_manager.save_tasks") as mock_save:
                     task_manager.main()
                     mock_save.assert_called_once()
                     tasks_list = mock_save.call_args[0][0]
@@ -73,10 +71,8 @@ class TestTaskManagerArgs(unittest.TestCase):
         task_to_remove = Tache("Task to remove", task_id=123456)
         test_argv = ["task_manager.py", "remove", "--id", "123456"]
         with patch.object(sys, "argv", test_argv):
-            with patch(
-                "task_manager.load_tasks", return_value=[task_to_remove]
-            ) as mock_load:
-                with patch("task_manager.save_tasks") as mock_save:
+            with patch("source.task_manager.load_tasks", return_value=[task_to_remove]):
+                with patch("source.task_manager.save_tasks") as mock_save:
                     task_manager.main()
                     mock_save.assert_called_once()
                     tasks_list = mock_save.call_args[0][0]
@@ -106,10 +102,8 @@ class TestTaskManagerArgs(unittest.TestCase):
             "2025-04-01",
         ]
         with patch.object(sys, "argv", test_argv):
-            with patch(
-                "task_manager.load_tasks", return_value=[task_to_edit]
-            ) as mock_load:
-                with patch("task_manager.save_tasks") as mock_save:
+            with patch("source.task_manager.load_tasks", return_value=[task_to_edit]):
+                with patch("source.task_manager.save_tasks") as mock_save:
                     task_manager.main()
                     self.assertEqual(task_to_edit.get_titre(), "New Title")
                     self.assertEqual(task_to_edit.get_description(), "New Description")
@@ -127,10 +121,8 @@ class TestTaskManagerArgs(unittest.TestCase):
         task2 = Tache("Task 2", "Desc 2", 2, "2025-02-02", task_id=222222)
         test_argv = ["task_manager.py", "list"]
         with patch.object(sys, "argv", test_argv):
-            with patch(
-                "task_manager.load_tasks", return_value=[task1, task2]
-            ) as mock_load:
-                with patch("task_manager.save_tasks") as mock_save:
+            with patch("source.task_manager.load_tasks", return_value=[task1, task2]):
+                with patch("source.task_manager.save_tasks") as mock_save:
                     task_manager.main()
                     mock_save.assert_not_called()
 
@@ -202,8 +194,8 @@ class TestTaskManagerArgs(unittest.TestCase):
         test_id = "999999"
         test_argv = ["task_manager.py", "remove", "--id", test_id]
         with patch.object(sys, "argv", test_argv):
-            with patch("task_manager.load_tasks", return_value=[]):
-                with patch("task_manager.save_tasks") as mock_save:
+            with patch("source.task_manager.load_tasks", return_value=[]):
+                with patch("source.task_manager.save_tasks") as mock_save:
                     with patch("sys.stdout", new_callable=io.StringIO) as fake_out:
                         task_manager.main()
                         output = fake_out.getvalue()
@@ -234,8 +226,8 @@ class TestTaskManagerArgs(unittest.TestCase):
             "2025-04-01",
         ]
         with patch.object(sys, "argv", test_argv):
-            with patch("task_manager.load_tasks", return_value=[]):
-                with patch("task_manager.save_tasks") as mock_save:
+            with patch("source.task_manager.load_tasks", return_value=[]):
+                with patch("source.task_manager.save_tasks") as mock_save:
                     with patch("sys.stdout", new_callable=io.StringIO) as fake_out:
                         task_manager.main()
                         output = fake_out.getvalue()
