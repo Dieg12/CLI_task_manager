@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html lang="fr" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>source.task_manager &#8212; Documentation CLI_task_manager 0.1</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../_static/documentation_options.js?v=af8511e3"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Code source de source.task_manager</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module task_manager.</span>
+
+<span class="sd">Ce module fournit une interface en ligne de commande (CLI) pour la gestion d&#39;une liste de tâches.</span>
+
+<span class="sd">Fonctionnalités:</span>
+<span class="sd">    - Chargement et sauvegarde des tâches depuis/vers un fichier JSON.</span>
+<span class="sd">    - Ajout d&#39;une nouvelle tâche, avec génération d&#39;un identifiant unique.</span>
+<span class="sd">    - Suppression d&#39;une tâche existante par son identifiant.</span>
+<span class="sd">    - Affichage de la liste des tâches, avec possibilité de tri par titre,\</span>
+<span class="sd">          priorité ou date d&#39;échéance.</span>
+<span class="sd">    - Modification d&#39;une tâche existante (édition).</span>
+
+<span class="sd">Les tâches sont représentées par des instances de la classe Tache,\</span>
+<span class="sd">      définie dans le module source.tache.</span>
+<span class="sd">Les messages affichés à l&#39;utilisateur sont centralisés dans le module source.textes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">source.tache</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tache</span>  <span class="c1"># Importation de la classe Tache depuis tache.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">source.textes</span><span class="w"> </span><span class="kn">import</span> <span class="n">WELCOME_MESSAGE</span><span class="p">,</span> <span class="n">ERROR_MESSAGE</span>
+
+<span class="n">DEFAULT_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;tasks.json&quot;</span>  <span class="c1"># Nom par défaut du fichier de sauvegarde des tâches</span>
+
+
+<div class="viewcode-block" id="load_tasks">
+<a class="viewcode-back" href="../../source.html#source.task_manager.load_tasks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_tasks</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Charge les tâches depuis un fichier JSON et retourne une liste d&#39;objets Tache.</span>
+
+<span class="sd">    Si le fichier n&#39;existe pas ou en cas d&#39;erreur de décodage, une liste vide est retournée.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename (str): Chemin du fichier JSON contenant les tâches.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[Tache]: Liste d&#39;instances de Tache.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">tasks_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="c1"># Reconstruction des objets Tache à partir des dictionnaires</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Tache</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">tasks_data</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Erreur lors du décodage du fichier JSON.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+
+
+<div class="viewcode-block" id="save_tasks">
+<a class="viewcode-back" href="../../source.html#source.task_manager.save_tasks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">DEFAULT_FILENAME</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sauvegarde une liste d&#39;objets Tache dans un fichier JSON.</span>
+
+<span class="sd">    Chaque objet Tache est converti en dictionnaire avant d&#39;être sauvegardé.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tasks (list[Tache]): Liste des tâches à sauvegarder.</span>
+<span class="sd">        filename (str, optional): Chemin du fichier JSON de sauvegarde.\</span>
+<span class="sd">              Defaults to DEFAULT_FILENAME.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tasks_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">tasks_data</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="generate_unique_id">
+<a class="viewcode-back" href="../../source.html#source.task_manager.generate_unique_id">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_unique_id</span><span class="p">(</span><span class="n">tasks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Génère un identifiant unique à 6 chiffres non utilisé parmi les tâches existantes.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tasks (list[Tache]): Liste des tâches existantes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: Un identifiant unique.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">existing_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">task</span><span class="o">.</span><span class="n">task_id</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span> <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">task_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">100000</span><span class="p">,</span> <span class="mi">999999</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">candidate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_ids</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">candidate</span></div>
+
+
+
+<div class="viewcode-block" id="handle_add">
+<a class="viewcode-back" href="../../source.html#source.task_manager.handle_add">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_add</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">tasks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ajoute une nouvelle tâche.</span>
+
+<span class="sd">    Affiche les informations de la tâche à ajouter,\</span>
+<span class="sd">          crée une instance de Tache avec un identifiant unique,</span>
+<span class="sd">    ajoute la tâche à la liste et sauvegarde la liste dans le fichier JSON par défaut.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Arguments de la ligne de commande contenant les détails de la tâche.</span>
+<span class="sd">        tasks (list[Tache]): Liste des tâches existantes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ajout de la tâche :&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Titre       : </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">desc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Description : </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">desc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Priorité    : </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">priority</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">due</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Date d&#39;échéance : </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">due</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">nouvelle_tache</span> <span class="o">=</span> <span class="n">Tache</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">due</span><span class="p">)</span>
+    <span class="n">nouvelle_tache</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="n">generate_unique_id</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+    <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nouvelle_tache</span><span class="p">)</span>
+    <span class="n">save_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Tâche ajoutée avec l&#39;ID </span><span class="si">{</span><span class="n">nouvelle_tache</span><span class="o">.</span><span class="n">task_id</span><span class="si">}</span><span class="s2"> et sauvegardée dans </span><span class="si">{</span><span class="n">DEFAULT_FILENAME</span><span class="si">}</span><span class="s2">.&quot;</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="handle_remove">
+<a class="viewcode-back" href="../../source.html#source.task_manager.handle_remove">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_remove</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">tasks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Supprime une tâche en recherchant par identifiant.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Arguments de la ligne de commande contenant l&#39;identifiant de la tâche à supprimer.</span>
+<span class="sd">        tasks (list[Tache]): Liste des tâches existantes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">task_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">task_to_remove</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">task_id</span> <span class="o">==</span> <span class="n">task_id</span><span class="p">:</span>
+            <span class="n">task_to_remove</span> <span class="o">=</span> <span class="n">task</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="n">task_to_remove</span><span class="p">:</span>
+        <span class="n">tasks</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">task_to_remove</span><span class="p">)</span>
+        <span class="n">save_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tâche avec l&#39;ID </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2"> supprimée.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Aucune tâche trouvée avec l&#39;ID </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="handle_list">
+<a class="viewcode-back" href="../../source.html#source.task_manager.handle_list">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_list</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">tasks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Affiche la liste des tâches, avec un tri optionnel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Arguments de la ligne de commande pouvant inclure l&#39;option de tri.</span>
+<span class="sd">        tasks (list[Tache]): Liste des tâches existantes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Affichage de la liste des tâches&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">sort</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tri par : </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">sort</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">sort</span> <span class="o">==</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span>
+            <span class="n">tasks</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">titre</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">sort</span> <span class="o">==</span> <span class="s2">&quot;priority&quot;</span><span class="p">:</span>
+            <span class="n">tasks</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">priorite</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">sort</span> <span class="o">==</span> <span class="s2">&quot;due&quot;</span><span class="p">:</span>
+            <span class="n">tasks</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">date_limite</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">40</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="handle_edit">
+<a class="viewcode-back" href="../../source.html#source.task_manager.handle_edit">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_edit</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">tasks</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modifie une tâche existante en recherchant par identifiant.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Arguments de la ligne de commande contenant les modifications à apporter à la tâche.</span>
+<span class="sd">        tasks (list[Tache]): Liste des tâches existantes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">task_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">task_to_edit</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">task_id</span> <span class="o">==</span> <span class="n">task_id</span><span class="p">:</span>
+            <span class="n">task_to_edit</span> <span class="o">=</span> <span class="n">task</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="n">task_to_edit</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task_to_edit</span><span class="o">.</span><span class="n">set_titre</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">desc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task_to_edit</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">desc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">priority</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task_to_edit</span><span class="o">.</span><span class="n">set_priorite</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">due</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task_to_edit</span><span class="o">.</span><span class="n">set_date_limite</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">due</span><span class="p">)</span>
+        <span class="n">save_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tâche avec l&#39;ID </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2"> mise à jour.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Aucune tâche trouvée avec l&#39;ID </span><span class="si">{</span><span class="n">task_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../source.html#source.task_manager.main">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Point d&#39;entrée principal de l&#39;application CLI.</span>
+
+<span class="sd">    Configure l&#39;analyse des arguments de la ligne de commande et délègue l&#39;exécution</span>
+<span class="sd">    de la commande à la fonction correspondante.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">WELCOME_MESSAGE</span><span class="p">)</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Une application CLI simple.&quot;</span><span class="p">,</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawTextHelpFormatter</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;command&quot;</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Commandes disponibles&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Choisissez une commande à exécuter&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Configuration de la commande &quot;add&quot;</span>
+    <span class="n">parser_add</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s2">&quot;add&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Ajoute une tâche à la liste&quot;</span><span class="p">)</span>
+    <span class="n">parser_add</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--title&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Titre de la tâche&quot;</span><span class="p">)</span>
+    <span class="n">parser_add</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--desc&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Description de la tâche&quot;</span><span class="p">)</span>
+    <span class="n">parser_add</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--priority&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Priorité de la tâche (défaut: 1)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser_add</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--due&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Date d&#39;échéance de la tâche (format YYYY-MM-DD)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser_add</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">handle_add</span><span class="p">)</span>
+
+    <span class="c1"># Configuration de la commande &quot;remove&quot;</span>
+    <span class="n">parser_remove</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+        <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Supprime une tâche de la liste&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser_remove</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--id&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Identifiant de la tâche à supprimer&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser_remove</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">handle_remove</span><span class="p">)</span>
+
+    <span class="c1"># Configuration de la commande &quot;list&quot;</span>
+    <span class="n">parser_list</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Affiche la liste des tâches&quot;</span><span class="p">)</span>
+    <span class="n">parser_list</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--sort&quot;</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;priority&quot;</span><span class="p">,</span> <span class="s2">&quot;due&quot;</span><span class="p">],</span>
+        <span class="n">help</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;Trier la liste par :</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  title     Trier par titre</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  priority  Trier par priorité</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="s2">&quot;  due       Trier par date d&#39;échéance&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">parser_list</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">handle_list</span><span class="p">)</span>
+
+    <span class="c1"># Configuration de la commande &quot;edit&quot;</span>
+    <span class="n">parser_edit</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s2">&quot;edit&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Modifie une tâche existante&quot;</span><span class="p">)</span>
+    <span class="n">parser_edit</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--id&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Identifiant de la tâche à modifier&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser_edit</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--title&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Nouveau titre de la tâche&quot;</span><span class="p">)</span>
+    <span class="n">parser_edit</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--desc&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Nouvelle description de la tâche&quot;</span><span class="p">)</span>
+    <span class="n">parser_edit</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--priority&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Nouvelle priorité de la tâche&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser_edit</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--due&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Nouvelle date d&#39;échéance de la tâche (format YYYY-MM-DD)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser_edit</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">handle_edit</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="c1"># Chargement des tâches depuis le fichier JSON</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="n">load_tasks</span><span class="p">(</span><span class="n">DEFAULT_FILENAME</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s2">&quot;func&quot;</span><span class="p">):</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">ERROR_MESSAGE</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">CLI_task_manager</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Documentation des modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../source.html">source package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Code du module</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Diego Iglesias.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
