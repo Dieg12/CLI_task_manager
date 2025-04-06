@@ -57,9 +57,9 @@ Elle est déployée automatiquement sur GitHub pages : https://dieg12.github.io/
 
 ## 🗂 Structure du Projet
 
-- **`task_manager.py`** : Le module principal pour l'interface CLI.
-- **`tache.py`** : Définit la classe `Tache` qui représente une tâche.
-- **`textes.py`** : Contient les messages affichés à l'utilisateur.
+- **`source.task_manager.py`** : Le module principal pour l'interface CLI.
+- **`source.tache.py`** : Définit la classe `Tache` qui représente une tâche.
+- **`source.textes.py`** : Contient les messages affichés à l'utilisateur.
 - **`docs/`** : Contient la configuration et les sources de la documentation générée par Sphinx.
 
 ---
