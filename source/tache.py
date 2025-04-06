@@ -23,7 +23,8 @@ class Tache:
         titre (str): Le titre de la tâche (obligatoire).
         description (str or None, optional): La description de la tâche. Defaults to None.
         priorite (int, optional): La priorité de la tâche (doit être au moins 1). Defaults to 1.
-        date_limite (str or None, optional): La date limite de la tâche, par exemple au format YYYY-MM-DD. Defaults to None.
+        date_limite (str or None, optional): La date limite de la tâche,\
+              par exemple au format YYYY-MM-DD. Defaults to None.
         id (int or None, optional): L'identifiant unique de la tâche. Defaults to None.
     """
 
@@ -35,7 +36,8 @@ class Tache:
             titre (str): Le titre de la tâche (obligatoire).
             description (str or None, optional): La description de la tâche. Defaults to None.
             priorite (int, optional): La priorité de la tâche, doit être au moins 1. Defaults to 1.
-            date_limite (str or None, optional): La date limite de la tâche, par exemple au format YYYY-MM-DD. Defaults to None.
+            date_limite (str or None, optional): La date limite de la tâche,\
+                  par exemple au format YYYY-MM-DD. Defaults to None.
             id (int or None, optional): L'identifiant unique de la tâche. Defaults to None.
         """
         self.titre = titre

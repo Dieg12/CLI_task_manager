@@ -9,10 +9,12 @@ Fonctionnalités:
     - Chargement et sauvegarde des tâches depuis/vers un fichier JSON.
     - Ajout d'une nouvelle tâche, avec génération d'un identifiant unique.
     - Suppression d'une tâche existante par son identifiant.
-    - Affichage de la liste des tâches, avec possibilité de tri par titre, priorité ou date d'échéance.
+    - Affichage de la liste des tâches, avec possibilité de tri par titre,\
+          priorité ou date d'échéance.
     - Modification d'une tâche existante (édition).
 
-Les tâches sont représentées par des instances de la classe Tache, définie dans le module source.tache.
+Les tâches sont représentées par des instances de la classe Tache,\
+      définie dans le module source.tache.
 Les messages affichés à l'utilisateur sont centralisés dans le module source.textes.
 """
 
@@ -55,7 +57,8 @@ def save_tasks(tasks, filename=DEFAULT_FILENAME):
 
     Args:
         tasks (list[Tache]): Liste des tâches à sauvegarder.
-        filename (str, optional): Chemin du fichier JSON de sauvegarde. Defaults to DEFAULT_FILENAME.
+        filename (str, optional): Chemin du fichier JSON de sauvegarde.\
+              Defaults to DEFAULT_FILENAME.
     """
     tasks_data = [task.to_dict() for task in tasks]
     with open(filename, "w", encoding="utf-8") as file:
@@ -81,7 +84,8 @@ def generate_unique_id(tasks):
 def handle_add(args, tasks):
     """Ajoute une nouvelle tâche.
 
-    Affiche les informations de la tâche à ajouter, crée une instance de Tache avec un identifiant unique,
+    Affiche les informations de la tâche à ajouter,\
+          crée une instance de Tache avec un identifiant unique,
     ajoute la tâche à la liste et sauvegarde la liste dans le fichier JSON par défaut.
 
     Args:
