@@ -44,6 +44,8 @@ Lancez l'application via la ligne de commande. Voici quelques exemples de comman
 
 La documentation complète est générée avec **Sphinx**.
 
+Elle est déployée automatiquement sur GitHub pages : https://dieg12.github.io/CLI_task_manager/ 
+
 1. **Générer la documentation** :
    ```bash
    sphinx-build -M html ./docs/source ./build --fail-on-warning
