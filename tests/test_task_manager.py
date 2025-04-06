@@ -236,6 +236,140 @@ class TestTaskManagerArgs(unittest.TestCase):
                         )
                         mock_save.assert_not_called()
 
+    def test_edit_without_changes(self):
+        """Test de l'édition d'une tâche sans fournir de nouvelles valeurs.
 
-if __name__ == "__main__":
-    unittest.main()
+        Vérifie que, même sans modification, la tâche est sauvegardée et qu'un message
+        de mise à jour est affiché, tout en conservant ses valeurs initiales.
+        """
+        task_to_edit = Tache(
+            "Titre initial", "Description initiale", 1, "2025-06-01", task_id=777777
+        )
+        test_argv = ["task_manager.py", "edit", "--id", "777777"]
+        with patch.object(sys, "argv", test_argv):
+            with patch("source.task_manager.load_tasks", return_value=[task_to_edit]):
+                with patch("source.task_manager.save_tasks") as mock_save:
+                    with patch("sys.stdout", new_callable=io.StringIO) as fake_out:
+                        task_manager.main()
+                        output = fake_out.getvalue()
+                        self.assertIn("Tâche avec l'ID 777777 mise à jour.", output)
+                        # Vérification que la tâche reste inchangée
+                        self.assertEqual(task_to_edit.get_titre(), "Titre initial")
+                        self.assertEqual(
+                            task_to_edit.get_description(), "Description initiale"
+                        )
+                        self.assertEqual(task_to_edit.get_priorite(), 1)
+                        self.assertEqual(task_to_edit.get_date_limite(), "2025-06-01")
+                        mock_save.assert_called_once()
+
+    def test_list_sort_by_title(self):
+        """Test de l'affichage de la liste des tâches avec tri par titre."""
+        # Créer deux tâches avec des titres dans un ordre non trié
+        task1 = Tache("Zebra", "Desc", 2, "2025-02-02", task_id=1)
+        task2 = Tache("Apple", "Desc", 3, "2025-01-01", task_id=2)
+        test_argv = ["task_manager.py", "list", "--sort", "title"]
+        with patch.object(sys, "argv", test_argv):
+            with patch("source.task_manager.load_tasks", return_value=[task1, task2]):
+                with patch("source.task_manager.save_tasks") as mock_save:
+                    with patch("sys.stdout", new_callable=io.StringIO) as fake_out:
+                        task_manager.main()
+                        output = fake_out.getvalue()
+                        # Vérifier que le message de tri est affiché
+                        self.assertIn("Tri par : title", output)
+                        # Extraire les titres depuis la sortie
+                        titres = [
+                            line.split("Titre: ")[1]
+                            for line in output.splitlines()
+                            if "Titre: " in line
+                        ]
+                        # Les titres doivent être triés par ordre alphabétique
+                        self.assertEqual(titres, sorted(titres))
+                        mock_save.assert_not_called()
+
+    def test_list_sort_by_priority(self):
+        """Test de l'affichage de la liste des tâches avec tri par priorité."""
+        # Créer trois tâches avec des priorités différentes
+        task1 = Tache("Task A", "Desc", 3, "2025-02-02", task_id=1)
+        task2 = Tache("Task B", "Desc", 1, "2025-01-01", task_id=2)
+        task3 = Tache("Task C", "Desc", 2, "2025-03-03", task_id=3)
+        test_argv = ["task_manager.py", "list", "--sort", "priority"]
+        with patch.object(sys, "argv", test_argv):
+            with patch(
+                "source.task_manager.load_tasks", return_value=[task1, task2, task3]
+            ):
+                with patch("source.task_manager.save_tasks") as mock_save:
+                    with patch("sys.stdout", new_callable=io.StringIO) as fake_out:
+                        task_manager.main()
+                        output = fake_out.getvalue()
+                        self.assertIn("Tri par : priority", output)
+                        # Extraire les priorités depuis la sortie
+                        priorites = [
+                            int(line.split("Priorité: ")[1])
+                            for line in output.splitlines()
+                            if "Priorité: " in line
+                        ]
+                        self.assertEqual(priorites, sorted(priorites))
+                        mock_save.assert_not_called()
+
+    def test_list_sort_by_due(self):
+        """Test de l'affichage de la liste des tâches avec tri par date d'échéance."""
+        # Créer trois tâches avec des dates d'échéance différentes
+        # Pour la tâche sans date, la clé de tri sera "" (ce qui devrait la placer en premier)
+        task1 = Tache("Task A", "Desc", 1, None, task_id=1)
+        task2 = Tache("Task B", "Desc", 2, "2025-03-03", task_id=2)
+        task3 = Tache("Task C", "Desc", 3, "2025-01-01", task_id=3)
+        test_argv = ["task_manager.py", "list", "--sort", "due"]
+        with patch.object(sys, "argv", test_argv):
+            with patch(
+                "source.task_manager.load_tasks", return_value=[task1, task2, task3]
+            ):
+                with patch("source.task_manager.save_tasks") as mock_save:
+                    with patch("sys.stdout", new_callable=io.StringIO) as fake_out:
+                        task_manager.main()
+                        output = fake_out.getvalue()
+                        self.assertIn("Tri par : due", output)
+                        # Extraire les dates d'échéance depuis la sortie
+                        dates = [
+                            line.split("Date limite: ")[1]
+                            for line in output.splitlines()
+                            if "Date limite: " in line
+                        ]
+                        # La tâche sans date affichera "None". Le tri attendra alors : "" < "2025-01-01" < "2025-03-03"
+                        # Ainsi, l'ordre attendu dans la sortie est : "None", "2025-01-01", "2025-03-03"
+                        self.assertEqual(dates, ["None", "2025-01-01", "2025-03-03"])
+                        mock_save.assert_not_called()
+
+    def test_save_tasks(self):
+        """Test de la sauvegarde des tâches dans un fichier JSON.
+
+        Ce test crée deux tâches, les sauvegarde dans un fichier temporaire, puis lit
+        le contenu du fichier pour vérifier qu'il correspond à la conversion en dictionnaire
+        des tâches.
+        """
+        import tempfile
+        import json
+        import os
+
+        tasks = [
+            Tache("Task 1", "Description 1", 1, "2025-01-01", task_id=111111),
+            Tache("Task 2", "Description 2", 2, "2025-02-02", task_id=222222),
+        ]
+
+        # Créer un fichier temporaire pour la sauvegarde
+        with tempfile.NamedTemporaryFile(
+            "w+", delete=False, encoding="utf-8"
+        ) as tmp_file:
+            filename = tmp_file.name
+
+        try:
+            # Appel de la fonction save_tasks en utilisant le fichier temporaire
+            task_manager.save_tasks(tasks, filename)
+
+            # Lecture du fichier sauvegardé et vérification du contenu JSON
+            with open(filename, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            expected = [task.to_dict() for task in tasks]
+            self.assertEqual(data, expected)
+        finally:
+            os.remove(filename)
