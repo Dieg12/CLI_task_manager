@@ -153,7 +153,3 @@ class TestTache(unittest.TestCase):
             100000 <= new_id <= 999999,
             "L'ID doit être un nombre à 6 chiffres pour une liste vide",
         )
-
-
-if __name__ == "__main__":
-    unittest.main()
