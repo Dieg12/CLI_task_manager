@@ -4,16 +4,15 @@
 Module task_manager.
 
 Ce module fournit une interface en ligne de commande (CLI) pour la gestion d'une liste de tâches.
-Il offre les fonctionnalités suivantes :
 
-- Chargement et sauvegarde des tâches depuis/vers un fichier JSON.
-- Ajout d'une nouvelle tâche, avec génération d'un identifiant unique.
-- Suppression d'une tâche existante par son identifiant.
-- Affichage de la liste des tâches, avec possibilité de tri par titre, priorité ou date d'échéance.
-- Modification d'une tâche existante (édition).
+Fonctionnalités:
+    - Chargement et sauvegarde des tâches depuis/vers un fichier JSON.
+    - Ajout d'une nouvelle tâche, avec génération d'un identifiant unique.
+    - Suppression d'une tâche existante par son identifiant.
+    - Affichage de la liste des tâches, avec possibilité de tri par titre, priorité ou date d'échéance.
+    - Modification d'une tâche existante (édition).
 
-Les tâches sont représentées par des instances de la classe Tache \
-    définie dans le module source.tache.
+Les tâches sont représentées par des instances de la classe Tache, définie dans le module source.tache.
 Les messages affichés à l'utilisateur sont centralisés dans le module source.textes.
 """
 
@@ -27,15 +26,15 @@ DEFAULT_FILENAME = "tasks.json"  # Nom par défaut du fichier de sauvegarde des 
 
 
 def load_tasks(filename):
-    """
-    Charge les tâches depuis un fichier JSON et retourne une liste d'objets Tache.
+    """Charge les tâches depuis un fichier JSON et retourne une liste d'objets Tache.
 
-    Si le fichier n'existe pas ou en cas d'erreur de décodage, retourne une liste vide.
+    Si le fichier n'existe pas ou en cas d'erreur de décodage, une liste vide est retournée.
 
-    :param filename: Chemin du fichier JSON contenant les tâches.
-    :type filename: str
-    :return: Liste d'instances de Tache.
-    :rtype: list[Tache]
+    Args:
+        filename (str): Chemin du fichier JSON contenant les tâches.
+
+    Returns:
+        list[Tache]: Liste d'instances de Tache.
     """
     try:
         with open(filename, "r", encoding="utf-8") as file:
@@ -50,15 +49,13 @@ def load_tasks(filename):
 
 
 def save_tasks(tasks, filename=DEFAULT_FILENAME):
-    """
-    Sauvegarde une liste d'objets Tache dans un fichier JSON.
+    """Sauvegarde une liste d'objets Tache dans un fichier JSON.
 
-    Chaque objet est converti en dictionnaire avant d'être sauvegardé.
+    Chaque objet Tache est converti en dictionnaire avant d'être sauvegardé.
 
-    :param tasks: Liste des tâches à sauvegarder.
-    :type tasks: list[Tache]
-    :param filename: Chemin du fichier JSON de sauvegarde.
-    :type filename: str
+    Args:
+        tasks (list[Tache]): Liste des tâches à sauvegarder.
+        filename (str, optional): Chemin du fichier JSON de sauvegarde. Defaults to DEFAULT_FILENAME.
     """
     tasks_data = [task.to_dict() for task in tasks]
     with open(filename, "w", encoding="utf-8") as file:
@@ -66,13 +63,13 @@ def save_tasks(tasks, filename=DEFAULT_FILENAME):
 
 
 def generate_unique_id(tasks):
-    """
-    Génère un identifiant unique à 6 chiffres non utilisé parmi les tâches existantes.
+    """Génère un identifiant unique à 6 chiffres non utilisé parmi les tâches existantes.
 
-    :param tasks: Liste des tâches existantes.
-    :type tasks: list[Tache]
-    :return: Un identifiant unique.
-    :rtype: int
+    Args:
+        tasks (list[Tache]): Liste des tâches existantes.
+
+    Returns:
+        int: Un identifiant unique.
     """
     existing_ids = {task.id for task in tasks if task.id is not None}
     while True:
@@ -82,7 +79,15 @@ def generate_unique_id(tasks):
 
 
 def handle_add(args, tasks):
-    """Ajoute une nouvelle tâche."""
+    """Ajoute une nouvelle tâche.
+
+    Affiche les informations de la tâche à ajouter, crée une instance de Tache avec un identifiant unique,
+    ajoute la tâche à la liste et sauvegarde la liste dans le fichier JSON par défaut.
+
+    Args:
+        args: Arguments de la ligne de commande contenant les détails de la tâche.
+        tasks (list[Tache]): Liste des tâches existantes.
+    """
     print("Ajout de la tâche :")
     print(f"  Titre       : {args.title}")
     if args.desc is not None:
@@ -100,7 +105,12 @@ def handle_add(args, tasks):
 
 
 def handle_remove(args, tasks):
-    """Supprime une tâche en recherchant par ID."""
+    """Supprime une tâche en recherchant par identifiant.
+
+    Args:
+        args: Arguments de la ligne de commande contenant l'identifiant de la tâche à supprimer.
+        tasks (list[Tache]): Liste des tâches existantes.
+    """
     task_id = int(args.id)
     task_to_remove = None
     for task in tasks:
@@ -116,7 +126,12 @@ def handle_remove(args, tasks):
 
 
 def handle_list(args, tasks):
-    """Affiche la liste des tâches, éventuellement triée."""
+    """Affiche la liste des tâches, avec un tri optionnel.
+
+    Args:
+        args: Arguments de la ligne de commande pouvant inclure l'option de tri.
+        tasks (list[Tache]): Liste des tâches existantes.
+    """
     print("Affichage de la liste des tâches")
     if args.sort:
         print(f"Tri par : {args.sort}")
@@ -132,7 +147,12 @@ def handle_list(args, tasks):
 
 
 def handle_edit(args, tasks):
-    """Modifie une tâche existante en recherchant par ID."""
+    """Modifie une tâche existante en recherchant par identifiant.
+
+    Args:
+        args: Arguments de la ligne de commande contenant les modifications à apporter à la tâche.
+        tasks (list[Tache]): Liste des tâches existantes.
+    """
     task_id = int(args.id)
     task_to_edit = None
     for task in tasks:
@@ -155,11 +175,10 @@ def handle_edit(args, tasks):
 
 
 def main():
-    """
-    Point d'entrée principal de l'application CLI.
+    """Point d'entrée principal de l'application CLI.
 
-    Configure l'analyse des arguments et délègue l'exécution
-    de la commande à la fonction associée.
+    Configure l'analyse des arguments de la ligne de commande et délègue l'exécution
+    de la commande à la fonction correspondante.
     """
     print(WELCOME_MESSAGE)
 

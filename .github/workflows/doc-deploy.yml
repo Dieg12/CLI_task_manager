@@ -1,0 +1,38 @@
+name: Build and Deploy Sphinx Documentation
+# Workflow de construction et de déploiement de la documentation Sphinx
+
+on:
+  push:
+    branches: 
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  if_merged:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Installation des dependences
+      run: |
+        python -m pip install --upgrade pip
+        pip install sphinx
+
+    - name: Build Sphinx documentation
+      continue-on-error: true
+      run: |
+        sphinx-build -M html ./docs/source ./build
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        publish_branch: gh-pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build/html
+        force_orphan: true
