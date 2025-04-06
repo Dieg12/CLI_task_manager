@@ -1,11 +1,31 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Module de tests pour la classe Tache et la fonction generate_unique_id.
+
+Ce module contient des tests unitaires pour vérifier la création, la modification,
+la conversion et la représentation d'une tâche, ainsi que la génération d'un ID unique.
+
+Chaque méthode de test est documentée avec une docstring au format Google.
+"""
+
 import unittest
 from source.tache import Tache
 from source.task_manager import generate_unique_id
 
 
 class TestTache(unittest.TestCase):
+    """Tests unitaires pour la classe Tache et la génération d'ID unique."""
 
     def test_creation_with_only_title(self):
+        """Test de la création d'une tâche avec uniquement un titre.
+
+        Vérifie que :
+          - Le titre est correctement assigné.
+          - La priorité par défaut est 1.
+          - La description et la date limite sont None.
+          - L'ID de la tâche est None par défaut.
+        """
         tache1 = Tache("Faire les courses")
         self.assertEqual(tache1.get_titre(), "Faire les courses", "Erreur sur le titre")
         self.assertEqual(
@@ -20,6 +40,11 @@ class TestTache(unittest.TestCase):
         self.assertIsNone(tache1.task_id, "L'id par défaut devrait être None")
 
     def test_setters_and_getters(self):
+        """Test des setters et getters de la classe Tache.
+
+        Vérifie que les attributs description, priorité et date limite peuvent être
+        modifiés et récupérés correctement.
+        """
         tache1 = Tache("Faire les courses")
         tache1.set_description("Acheter fruits, légumes et pain")
         tache1.set_priorite(3)
@@ -35,6 +60,10 @@ class TestTache(unittest.TestCase):
         )
 
     def test_priority_minimum(self):
+        """Test que la priorité d'une tâche ne soit pas inférieure à 1.
+
+        Vérifie qu'en attribuant une valeur inférieure à 1, la priorité reste à 1.
+        """
         tache1 = Tache("Faire les courses")
         tache1.set_priorite(0)
         self.assertEqual(
@@ -42,7 +71,13 @@ class TestTache(unittest.TestCase):
         )
 
     def test_to_dict_from_dict(self):
-        # Création d'une tâche avec un id défini
+        """Test de la conversion d'une tâche en dictionnaire et de sa reconstruction.
+
+        Vérifie que :
+          - La conversion via to_dict produit le dictionnaire attendu.
+          - La reconstruction via from_dict recrée correctement la tâche avec
+            les mêmes attributs.
+        """
         tache1 = Tache("Test", "Test description", 5, "2025-01-01", task_id=123456)
         d = tache1.to_dict()
         expected = {
@@ -56,7 +91,6 @@ class TestTache(unittest.TestCase):
             d, expected, "La conversion en dictionnaire ne fonctionne pas comme prévu"
         )
 
-        # Reconstruction de la tâche à partir du dictionnaire
         tache2 = Tache.from_dict(d)
         self.assertEqual(tache2.get_titre(), "Test", "Erreur sur le titre reconstruit")
         self.assertEqual(
@@ -70,9 +104,15 @@ class TestTache(unittest.TestCase):
             "2025-01-01",
             "Erreur sur la date limite reconstruit",
         )
-        self.assertEqual(tache2.task_id, 123456, "L'id n'a pas été correctement reconstruit")
+        self.assertEqual(
+            tache2.task_id, 123456, "L'id n'a pas été correctement reconstruit"
+        )
 
     def test_str_representation(self):
+        """Test de la représentation en chaîne de caractères d'une tâche.
+
+        Vérifie que la représentation inclut l'ID de la tâche et le titre.
+        """
         tache1 = Tache(
             "Faire les courses", "Acheter du lait", 2, "2025-03-05", task_id=654321
         )
@@ -87,7 +127,13 @@ class TestTache(unittest.TestCase):
         )
 
     def test_generate_unique_id(self):
-        # Créer une liste de tâches avec des IDs connus
+        """Test de la génération d'un ID unique pour une tâche.
+
+        Vérifie que :
+          - L'ID généré n'est pas présent parmi les IDs existants.
+          - L'ID généré est un nombre à 6 chiffres.
+          - La génération fonctionne correctement même si la liste des tâches est vide.
+        """
         tache1 = Tache("Tâche 1", task_id=111111)
         tache2 = Tache("Tâche 2", task_id=222222)
         tasks = [tache1, tache2]
@@ -101,7 +147,6 @@ class TestTache(unittest.TestCase):
             100000 <= new_id <= 999999, "L'ID doit être un nombre à 6 chiffres"
         )
 
-        # Test de génération avec une liste vide
         tasks = []
         new_id = generate_unique_id(tasks)
         self.assertTrue(
